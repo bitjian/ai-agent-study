@@ -110,6 +110,45 @@
 | **Docker** | 一样 | Agent 上线标配，你 Go 学的 Docker 知识直接复用 |
 | **SSE / WebSocket** | 一样 | Agent 流式输出的传输层，你的前端强项 |
 
+## 八、运行时与执行模型（底层认知）
+
+**核心校正：`python` 命令 ↔ `node` 命令（同层）；`PVM` ↔ `V8`（同层）。** 把 V8 和「Python 解释器」并列是错了一层。
+
+| 概念 | 是什么 | JS/Node 对照 | 说明 |
+|---|---|---|---|
+| **语言规范** | 纸面标准，不是软件 | ECMAScript 规范 | Python 语言规范；都可有多种实现 |
+| **CPython** | Python 的官方实现（用 C 写的），就是 `python` 命令 | **Node.js 运行时** | 既是引擎又是运行时：含 PVM + 标准库 + GC + GIL |
+| **PVM（Python 虚拟机）** | 逐条解释字节码的 C 循环（`ceval.c`） | **V8 引擎** | 只是执行引擎，不是完整运行时 |
+| **字节码（.pyc）** | 源码编译后的虚拟机指令，缓存在 `__pycache__/` | V8 的 Ignition 字节码 | **Python 是栈式**（push/pop），**V8 是寄存器式**（`Star r22`） |
+| **AST** | 语法树 | 一样 | 两者前两步（源码→AST→字节码）几乎相同 |
+| **TurboFan** | 不存在于 CPython | V8 的 JIT 编译器 | 热点函数被编译成**真机器码**，这是 V8 快一个量级的原因 |
+| **PyPy** | 带 JIT 的 Python 实现 | 类似 V8 的思路 | 纯计算能快 5-10 倍，但生态兼容性不如 CPython |
+| **GIL（全局解释器锁）** | 同一进程内只允许一个线程执行字节码 | 对照：Node 单线程事件循环 | CPU 密集用**多进程**绕开（`ProcessPoolExecutor`），不是多线程 |
+| **libuv** | 不存在于 CPython | Node 的异步 IO 底层库 | Python 对应 asyncio（单线程事件循环，同思路） |
+
+### 执行流水线分叉点
+
+```
+Python:  .py → AST → .pyc 字节码 → PVM 逐条解释 ──────────→ CPU（全程无机器码）
+JS:      .js → AST → Ignition 字节码 → TurboFan JIT 机器码 → CPU
+```
+
+本机实测（1 亿次整数累加，M 系 Mac）：Python 3.13 耗时 4.24s，Node 22 耗时 0.55s，约 8 倍差距。
+
+**对 Agent 开发的影响：几乎为零。** 瓶颈是 LLM API 的网络等待（秒级），解释器差异（毫秒级）完全淹没。重计算由 numpy/向量库等 C 扩展承担。
+
+### 可复现的验证命令
+
+```bash
+# Python 字节码
+python -c "import dis; dis.dis(lambda a, b: a + b)"
+python -c "import sys; print(sys.implementation, sys._is_gil_enabled())"
+
+# V8 字节码与 JIT
+node --print-bytecode -e "function add(a,b){return a+b}; add(1,2)"
+node --trace-opt -e "function add(a,b){return a+b}; for(let i=0;i<2e5;i++) add(i,1)"
+```
+
 ## 使用建议
 
 1. 每天学到新词，回来补一行——这份表就是你的"外语词典"
