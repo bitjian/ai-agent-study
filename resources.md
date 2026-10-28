@@ -5,6 +5,25 @@
 
 ---
 
+# 起步包：好懂优先（懒得挑，只看这 6 个）
+
+按"从最容易理解"排序，适合 JS/Node 背景直接开干：
+
+| # | 资源 | 好懂在哪 | 投入 |
+|---|---|---|---|
+| 1 | [LangShift：JavaScript → Python 中文模块](https://langshift.dev/zh-cn/docs/js2py) | **专为 JS 开发者写的** 12 个模块，每节都是"JS 这样写 → Python 这样写"，连包管理/异步都做了对照 | 2-3 天 |
+| 2 | [Python Tutor 可视化执行](https://pythontutor.com/) | 把代码**一步步画出来**：list 别名、字符串不可变、栈帧、print vs return，肉眼可见 | 卡住就用 10 分钟 |
+| 3 | [廖雪峰 Python 教程](https://liaoxuefeng.com/books/python/introduction/index.html) | 中文最经典，小节短、有在线运行环境 | 3-4 天（主线） |
+| 4 | [learnpython.org](https://www.learnpython.org/) | 浏览器里直接敲代码，**零环境配置**，左讲右练 | 1 小时刷完基础 |
+| 5 | [菜鸟教程 Python3](https://www.runoob.com/python3/python3-tutorial.html) | 语法字典，忘了就搜 | 随查随走 |
+| 6 | [Learn X in Y Minutes: Python](https://learnxinyminutes.com/docs/python/) | 一页纸速查表，通勤路上看完 | 20 分钟 |
+
+**视频党**：B 站搜「小甲鱼」或「黑马程序员」零基础教程——前者风趣、后者系统，**选一个跟到底，别两个都看**。
+
+**中文对照仓库**：[shinder/from-js-to-python](https://github.com/shinder/from-js-to-python)（Jupyter Notebook 形式，边读边跑，含 JS↔Python 速查表）。
+
+---
+
 # 阶段 A · Python + 后端工程
 
 ## A1 · Python 语法速成（5-7 天）
